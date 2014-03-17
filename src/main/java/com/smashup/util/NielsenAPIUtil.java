@@ -45,6 +45,20 @@ public class NielsenAPIUtil implements Configuration {
 		 return jsonResponse;
 	 }
 	 
-	 
+	 // Get all the stores frequented by dominant demography 
+	 public String getStoresBydemography(String dominatrace, String dominatageGroup){
+		 nielsenRestclient= ClientBuilder.newClient();
+		 String t = String.format( "%s%s?agegroup=%s&race=%s&apikey=%s",BASEHACKATHLONHOST,"Stores/v1/demographic/" ,dominatageGroup, dominatrace, APIKEY );
+		 //System.out.println("before calling " + t);
+		 target = nielsenRestclient.target(t);
+		
+		// target = nielsenRestclient.target("https://nielsen.api.tibco.com/StoreAvailability/v1?product_id=0016000275270&lat=29.7904&long=-95.1624&apikey=1504-71e5a462-f1d2-4f8c-a518-0a3bd9ba1916");
+		 Invocation.Builder invocationBuilder =
+	                target.request(MediaType.APPLICATION_JSON);
+	        Response response = invocationBuilder.get();
+	        String jsonResponse= response.readEntity(String.class);
+		 System.out.println(jsonResponse);
+		 return jsonResponse;
+	 }
 	
 }

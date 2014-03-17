@@ -16,6 +16,7 @@ import org.junit.Test;
 
 import com.jayway.jsonpath.Filter;
 import com.jayway.jsonpath.JsonPath;
+import com.smashup.util.Configuration;
 import com.smashup.util.NielsenAPIUtil;
 
 public class TestNielsenTopProductAPI {
@@ -72,7 +73,7 @@ public class TestNielsenTopProductAPI {
 		 
 	 }
 	 
-	 @Test
+	 //@Test
 	 public void searchProduct() {
 		 
 		 NielsenAPIUtil na = new NielsenAPIUtil();
@@ -86,7 +87,16 @@ public class TestNielsenTopProductAPI {
 		 
 		 
 	 }
-	 
+	 @Test
+	 public void searchStoreByDemography() {
+		 
+		 NielsenAPIUtil na = new NielsenAPIUtil();
+		 String jsonResponse = na.getStoresBydemography(Configuration.RACE_WHITE, Configuration.AGE_18_24);
+		 List<String> upc=  JsonPath.read(jsonResponse, "$..StoreName");
+		 System.out.println(upc.toString());
+		  
+		 
+	 }
 	 
 	 public void insertintoClouddb() {
 		    Client c = ClientBuilder.newClient();
