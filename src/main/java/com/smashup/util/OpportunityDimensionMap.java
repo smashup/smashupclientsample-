@@ -15,7 +15,7 @@ public class OpportunityDimensionMap {
 			storeByRace = new HashMap(); 
 			NielsenAPIUtil na = new NielsenAPIUtil();
 			
-			String jsonResponse = na.getStoresBydemography(Configuration.RACE_WHITE, Configuration.AGE_18_24);
+			String jsonResponse = na.getStoresBydemography(Configuration.RACE_WHITE, Configuration.AGE_18_24,-1,-1);
 			List<String> storename=  JsonPath.read(jsonResponse, "$..StoreName");
 		}
 	}

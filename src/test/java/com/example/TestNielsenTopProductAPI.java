@@ -3,6 +3,7 @@ package com.example;
 import static org.junit.Assert.*;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -91,9 +92,13 @@ public class TestNielsenTopProductAPI {
 	 public void searchStoreByDemography() {
 		 
 		 NielsenAPIUtil na = new NielsenAPIUtil();
-		 String jsonResponse = na.getStoresBydemography(Configuration.RACE_WHITE, Configuration.AGE_18_24);
-		 List<String> upc=  JsonPath.read(jsonResponse, "$..StoreName");
-		 System.out.println(upc.toString());
+		 Map<String, Map<String, Integer>> white18_24 = na.getAllStoresBydemography(Configuration.RACE_WHITE, Configuration.AGE_18_24);
+		 System.out.println(white18_24.get(Configuration.RACE_WHITE+Configuration.AGE_18_24));
+		 
+		 Map<String, Map<String, Integer>> black18_24= na.getAllStoresBydemography(Configuration.RACE_BLACK, Configuration.AGE_18_24);
+		 System.out.println(black18_24.get(Configuration.RACE_BLACK+Configuration.AGE_18_24));
+		 //List<String> upc=  JsonPath.read(jsonResponse, "$..StoreName");
+		 //System.out.println(upc.toString());
 		  
 		 
 	 }

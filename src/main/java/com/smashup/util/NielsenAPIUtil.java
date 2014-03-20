@@ -1,6 +1,9 @@
 package com.smashup.util;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -8,6 +11,8 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import com.jayway.jsonpath.JsonPath;
 
 public class NielsenAPIUtil implements Configuration {
 	
@@ -46,9 +51,15 @@ public class NielsenAPIUtil implements Configuration {
 	 }
 	 
 	 // Get all the stores frequented by dominant demography 
-	 public String getStoresBydemography(String dominatrace, String dominatageGroup){
+	 public String getStoresBydemography(String dominatrace, String dominatageGroup, int pageNo, int pageSize){
 		 nielsenRestclient= ClientBuilder.newClient();
-		 String t = String.format( "%s%s?agegroup=%s&race=%s&apikey=%s",BASEHACKATHLONHOST,"Stores/v1/demographic/" ,dominatageGroup, dominatrace, APIKEY );
+		 String t = null;
+		 if ( pageNo == -1 || pageSize == -1){
+			  t = String.format( "%s%s?agegroup=%s&race=%s&apikey=%s",BASEHACKATHLONHOST,"Stores/v1/demographic/" ,dominatageGroup, dominatrace, APIKEY );	 
+		 }else {
+			 t = String.format( "%s%s?agegroup=%s&race=%s&apikey=%s&pagesize=%d&pageno=%d",BASEHACKATHLONHOST,"Stores/v1/demographic/" ,dominatageGroup, dominatrace, APIKEY, pageSize, pageNo );
+		 }
+		 
 		 //System.out.println("before calling " + t);
 		 target = nielsenRestclient.target(t);
 		
@@ -57,8 +68,49 @@ public class NielsenAPIUtil implements Configuration {
 	                target.request(MediaType.APPLICATION_JSON);
 	        Response response = invocationBuilder.get();
 	        String jsonResponse= response.readEntity(String.class);
-		 System.out.println(jsonResponse);
+		 //System.out.println(jsonResponse);
 		 return jsonResponse;
 	 }
-	
+	 
+	 public Map<String, Map<String, Integer>> getAllStoresBydemography(String dominatrace, String dominatageGroup){
+		 String response = getStoresBydemography(dominatrace,dominatageGroup, 1,25);
+		 Map<String, Map<String, Integer>> storeByRace = new HashMap<String, Map<String, Integer>>(); 
+		 Map<String, Integer> hm  = new HashMap<String, Integer>( );
+		 List<String> pageSize = JsonPath.read(response, "$..TotalPages");
+		 String size = pageSize.get(0);
+		 int pages  =  Integer.parseInt(size);
+		 List<String> storename = JsonPath.read(response, "$..StoreName");
+		 manageCount(hm,storename);
+		 storeByRace.put(dominatrace+dominatageGroup,hm);
+		 String r;  
+		 for (int page =2; page<= pages  ; page++)
+		 {
+			  r = getStoresBydemography(dominatrace,dominatageGroup, page,25);
+			  storename = JsonPath.read(r, "$..StoreName");
+			  manageCount(hm,storename);
+			  storeByRace.put(dominatrace+dominatageGroup,hm);
+			  
+		 };
+				 
+		 
+		 return storeByRace;
+	 }
+	 
+	 
+	 private void manageCount(Map<String, Integer> hm , List<String> storename){
+		 for (String name : storename){
+			 if (hm.containsKey(name) ){
+				 int count = (Integer)hm.get(name).intValue();
+				 hm.put(name, ++count);
+			 }else {
+				 hm.put(name, Integer.valueOf(1));
+			 }
+				 
+		 }
+		 return;
+	 }
+	 
+	 
 }
+
+
